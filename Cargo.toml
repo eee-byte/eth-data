@@ -1,9 +1,44 @@
 [package]
-name = "edg-signal"
+name = "eth-data"
 version = "0.1.0"
 authors = ["zhang-dong-dong <2209940496@qq.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_info"] }
+env_logger = "0.6"
+chrono = "0.4"
+structopt = "0.3"
+failure = { version = "0.1", features = ["derive"] }
+lazy_static = "1.4"
+jsonrpc-derive = "13"
+jsonrpc-core = "13"
+jsonrpc-http-server = "13"
+web3 = "0.8"
+reqwest = "0.9"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+hex = "0.4"
+parity-codec = "3.5"
+libsecp256k1 = "0.2.2"
+tiny-keccak = "1.4"
+ethereum-types = "0.6"
+rlp = "0.4"
+
+# Substrate (the versoin used by ChainX)
+substrate-primitives = { git = "https://github.com/chainpool/substrate" }
+primitives = { package = "sr-primitives", git = "https://github.com/chainpool/substrate" }
+system = { package = "srml-system", git = "https://github.com/chainpool/substrate" }
+support = { package = "srml-support", git = "https://github.com/chainpool/substrate" }
+
+# ChainX mainnet branch
+chainx-primitives = { path = "../ChainX/primitives" }
+xr-primitives = { path = "../ChainX/xr-primitives" }
+runtime = { package = "chainx-runtime", path = "../ChainX/runtime" }
+xsystem = { package = "xrml-xsystem", path = "../ChainX/xrml/xsystem" }
+xassets = { package = "xrml-xassets-assets", path = "../ChainX/xrml/xassets/assets" }
+xsdot = { package = "xrml-xbridge-sdot", path = "../ChainX/xrml/xbridge/sdot" }
+
+[dev-dependencies]
+hex-literal = "0.2"
+ed25519-dalek = "1.0.0-pre.1"
