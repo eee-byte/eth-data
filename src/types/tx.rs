@@ -1,6 +1,6 @@
-use std::ops;
-use serde::{Deserialize, Serialize};
 use super::*;
+use serde::{Deserialize, Serialize};
+use std::ops;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
@@ -54,7 +54,7 @@ pub struct Transaction {
 
 impl Transaction {
     pub fn rlp_append_usigned_transaction(&self, s: &mut rlp::RlpStream, chain_id: Option<u64>) {
-        s.begin_list(if chain_id.is_none() {6} else {9});
+        s.begin_list(if chain_id.is_none() { 6 } else { 9 });
         s.append(&self.nonce);
         s.append(&self.gas_price);
         s.append(&self.gas);
@@ -149,7 +149,7 @@ impl UnverifiedTransaction {
     pub fn chain_id(&self) -> Option<u64> {
         match self.v {
             v if self.is_unsigned() => Some(v),
-            v if v >= 35 => Some((v -35) / 2),
+            v if v >= 35 => Some((v - 35) / 2),
             _ => None,
         }
     }
@@ -204,8 +204,8 @@ impl From<FullTransaction> for UnverifiedTransaction {
 fn check_replay_protection(v: u64) -> u8 {
     match v {
         v if v == 27 => 0,
-        v if v ==28 => 1,
-        v if v >= 35 => ((v-1) % 2) as u8,
+        v if v == 28 => 1,
+        v if v >= 35 => ((v - 1) % 2) as u8,
         _ => 4,
     }
 }

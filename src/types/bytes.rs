@@ -1,6 +1,6 @@
-use std::fmt;
 use serde::de::{Error, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 
 ///Raw bytes wrapper
 #[derive(Clone, Default, PartialEq, Eq, Hash)]
@@ -26,13 +26,16 @@ impl rlp::Encodable for Bytes {
 
 impl rlp::Decodable for Bytes {
     fn decode(rlp: &rlp::Rlp) -> Result<Self, rlp::DecoderError> {
-        rlp.decoder().decode_value(|bytes| Ok(Bytes(bytes.to_vec())))
+        rlp.decoder()
+            .decode_value(|bytes| Ok(Bytes(bytes.to_vec())))
     }
 }
 
 impl Serialize for Bytes {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S:Serializer {
+    where
+        S: Serializer,
+    {
         let mut serialized = "0x".to_owned();
         serialized.push_str(hex::encode(&self.0).as_ref());
         serializer.serialize_str(serialized.as_ref())
@@ -41,7 +44,9 @@ impl Serialize for Bytes {
 
 impl<'a> Deserialize<'a> for Bytes {
     fn deserialize<D>(deserializer: D) -> Result<Bytes, D::Error>
-    where D: Deserializer<'a>{
+    where
+        D: Deserializer<'a>,
+    {
         deserializer.deserialize_identifier(BytesVisitor)
     }
 }
@@ -56,8 +61,10 @@ impl<'a> Visitor<'a> for BytesVisitor {
     }
 
     fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-    where E: Error {
-        if value.len() >=2 && &value[0..2] == "0x" {
+    where
+        E: Error,
+    {
+        if value.len() >= 2 && &value[0..2] == "0x" {
             if value.len() & 1 == 0 {
                 Ok(Bytes(
                     hex::decode(&value[2..]).map_err(|_| Error::custom("invalid hex"))?,
@@ -74,7 +81,9 @@ impl<'a> Visitor<'a> for BytesVisitor {
     }
 
     fn visit_string<E>(self, value: String) -> Result<Self::Value, E>
-    where E: Error {
+    where
+        E: Error,
+    {
         self.visit_str(value.as_ref())
     }
 }

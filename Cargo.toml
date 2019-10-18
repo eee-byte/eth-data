@@ -24,6 +24,7 @@ libsecp256k1 = "0.2.2"
 tiny-keccak = "1.4"
 ethereum-types = "0.6"
 rlp = "0.4"
+hex-literal = "0.2.1"
 
 # Substrate (the versoin used by ChainX)
 substrate-primitives = { git = "https://github.com/chainpool/substrate" }

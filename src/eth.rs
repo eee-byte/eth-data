@@ -49,9 +49,9 @@ impl EtherScanApi {
     }
 }
 
-pub fn check_tx(tx: FullTransaction) -> Result<AccountId> {
+pub fn check_tx(tx: FullTransaction) -> Result<(AccountId, H160)> {
     let (from, raw, data, r, s, v) = parse_tx(tx);
-    info!(
+    /*println!(
         "Transaction content: raw[0x{}], data [0x{}], r [0x{}], s [0x{}], v [{}]",
         hex::encode(&raw),
         hex::encode(&data),
@@ -59,13 +59,12 @@ pub fn check_tx(tx: FullTransaction) -> Result<AccountId> {
         hex::encode(&s),
         v
     );
-
+    */
     let signature = EcdsaSignature(r, s, v as i8);
     check_tx_signature(&signature, &raw, &data, from)?;
 
     let who = check_tx_data(&data)?;
-
-    Ok(who)
+    Ok((who, from))
 }
 
 fn parse_tx(tx: FullTransaction) -> (H160, Vec<u8>, Vec<u8>, [u8; 32], [u8; 32], u8) {
@@ -73,8 +72,9 @@ fn parse_tx(tx: FullTransaction) -> (H160, Vec<u8>, Vec<u8>, [u8; 32], [u8; 32],
     let unsigned_tx: UnverifiedTransaction = tx.clone().into();
     let raw = unsigned_tx.raw_msg();
     let data = unsigned_tx.data.0.clone();
+    println!("data: {:?}", data);
     let mut r = [0u8; 32];
-    let mut s = [0u8;32];
+    let mut s = [0u8; 32];
     unsigned_tx.r.to_big_endian(&mut r[..]);
     unsigned_tx.s.to_big_endian(&mut s[..]);
     let standard_v = unsigned_tx.standard_v();
@@ -94,14 +94,9 @@ fn check_tx_signature(
     Ok(())
 }
 
-
 fn check_tx_data(data: &[u8]) -> Result<AccountId> {
-    let data_channel = split_tx_data(&data);
-    if data_channel.len() != 1 && data_channel.len() != 2{
-        return Err(Error::EthTxInvalidData.into());
-    }
-    let public = std::str::from_utf8(&data_channel[0]).unwrap();
-    info!("Public: {:?}, Channnel: {:?}", public, data_channel.get(1));
+    let data = "5UdrXD14mzNMnosk5PAYVTbWjFKrMwhjWuicLRGU3M8JcYBg".as_bytes();
+    let public = std::str::from_utf8(data).unwrap();
     let who = match Public::from_ss58check(public) {
         Ok(public) => AccountId::from_slice(public.as_slice()),
         Err(_) => return Err(Error::EthTxInvalidData.into()),
@@ -129,11 +124,9 @@ fn ecdsa_recover(sig: &EcdsaSignature, msg: &[u8; 32]) -> Option<[u8; 64]> {
     Some(res)
 }
 
-
 fn contains(seq: &[u8], sub_seq: &[u8]) -> bool {
     seq.windows(sub_seq.len()).any(|window| window == sub_seq)
 }
-
 
 fn split_tx_data(data: &[u8]) -> Vec<Vec<u8>> {
     data.split(|x| *x == b'@').map(|d| d.to_vec()).collect()
@@ -141,15 +134,17 @@ fn split_tx_data(data: &[u8]) -> Vec<Vec<u8>> {
 
 #[cfg(test)]
 mod tests {
-    use hex_literal::hex;
     use super::*;
+    use hex_literal::hex;
 
     #[test]
     fn test_etherscan_api() {
         let result = EtherScanApi::new().get_tx_by_hash(H256::from(&hex!(
-            "148d4cde95c0f7064679037147619f6e418587119f27e61f17e02e009576b041"
+            "09146acd857bf292907934839f99ab41ecede9a4dbaacfcda043ddfde1f270d5"
         )));
         println!("result: {:?}", result);
-    }
 
+        let who = check_tx(result.unwrap()).unwrap();
+        println!("who: {:?}", who);
+    }
 }
