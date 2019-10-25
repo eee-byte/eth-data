@@ -4,18 +4,25 @@ use substrate_primitives::crypto::Ss58Codec;
 use substrate_primitives::ed25519::{Pair, Public};
 
 use chainx_primitives::AccountId;
-use xsdot::{EcdsaSignature, EthereumAddress};
 
 use crate::error::{Error, Result};
-use crate::types::{FullTransaction, UnverifiedTransaction, H160, H256};
+use crate::types::{FullTransaction, EthereumAddress, Block, EcdsaSignature, UnverifiedTransaction, H160, H256};
 
 pub static ETHERSCAN_API: &str = "http://api-cn.etherscan.com/api?module=proxy&action=eth_getTransactionByHash&apikey=WEPDGZ6U6GQ2RD4AGZNUV7CJ25C44KQQAJ&txhash=";
+pub static ETHERSCAN_GETBLOCKTX_API: &str = "http://api-cn.etherscan.com/api?module=proxy&action=eth_getBlockByNumber&apikey=WEPDGZ6U6GQ2RD4AGZNUV7CJ25C44KQQAJ&boolean=true&tag=";
 
 #[derive(Deserialize, Debug)]
 struct EtherScanApiResult {
     id: u64,
     jsonrpc: String,
     result: Option<FullTransaction>,
+}
+
+#[derive(Deserialize, Debug)]
+struct EtherScanResult {
+    id: u64,
+    jsonrpc: String,
+    result: Option<Block>,
 }
 
 #[derive(Clone)]
@@ -42,10 +49,33 @@ impl EtherScanApi {
         }
     }
 
+    pub fn get_tx_by_block_num(&self, block_num: u32)  {
+//        match self.get_tx_by_block_impl(block_num) {
+//            Ok(transaction) => match transaction {
+//                Some(transaction) => Ok(transaction),
+//                None => {
+//                    warn!("Non-existent Ethereum transaction");
+//                    Err(Error::NonExistentEthTx.into())
+//                }
+//            },
+//            Err(err) => {
+//                error!("EtherScanApi get Ethereum tx error: {:?}", err);
+//                Err(Error::EtherScanCannotGetTx.into())
+//            }
+//        }
+    }
+
     pub fn get_tx_by_hash_impl(&self, hash: H256) -> Result<Option<FullTransaction>> {
         let url = format!("{}{:?}", ETHERSCAN_API, hash);
         let result = self.0.get(&url).send()?.json::<EtherScanApiResult>()?;
         Ok(result.result)
+    }
+
+    pub fn get_tx_by_block_impl(&self, block_num: u32) {
+        let url = format!("{}{:#x}", ETHERSCAN_GETBLOCKTX_API, block_num);
+        println!("url:{:?}", url);
+        let result = self.0.get(&url).send().unwrap().json::<EtherScanResult>().unwrap();
+        println!("{:?}", result)
     }
 }
 
@@ -138,7 +168,7 @@ mod tests {
     use hex_literal::hex;
 
     #[test]
-    fn test_etherscan_api() {
+    fn test_etherscan_txhash_api() {
         let result = EtherScanApi::new().get_tx_by_hash(H256::from(&hex!(
             "09146acd857bf292907934839f99ab41ecede9a4dbaacfcda043ddfde1f270d5"
         )));
@@ -146,5 +176,14 @@ mod tests {
 
         let who = check_tx(result.unwrap()).unwrap();
         println!("who: {:?}", who);
+    }
+
+    #[test]
+    fn test_etherscan_block_api() {
+        let result = EtherScanApi::new().get_tx_by_block_impl(5466);
+//        println!("result: {:?}", result);
+//
+//        let who = check_tx(result.unwrap()).unwrap();
+//        println!("who: {:?}", who);
     }
 }

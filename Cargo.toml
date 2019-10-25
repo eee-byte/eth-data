@@ -25,20 +25,20 @@ tiny-keccak = "1.4"
 ethereum-types = "0.6"
 rlp = "0.4"
 hex-literal = "0.2.1"
+fixed-hash = "0.5.0"
+impl-rlp = "0.2.0"
 
 # Substrate (the versoin used by ChainX)
-substrate-primitives = { git = "https://github.com/chainpool/substrate" }
-primitives = { package = "sr-primitives", git = "https://github.com/chainpool/substrate" }
-system = { package = "srml-system", git = "https://github.com/chainpool/substrate" }
-support = { package = "srml-support", git = "https://github.com/chainpool/substrate" }
+substrate-primitives = { git = "https://github.com/chainpool/substrate" ,rev="c0222af"}
+primitives = { package = "sr-primitives", git = "https://github.com/chainpool/substrate" ,rev="c0222af"}
+#system = { package = "srml-system", git = "https://github.com/chainpool/substrate" ,rev="c0222af"}
+#support = { package = "srml-support", git = "https://github.com/chainpool/substrate" ,rev="c0222af"}
 
 # ChainX mainnet branch
 chainx-primitives = { path = "../ChainX/primitives" }
-xr-primitives = { path = "../ChainX/xr-primitives" }
-runtime = { package = "chainx-runtime", path = "../ChainX/runtime" }
-xsystem = { package = "xrml-xsystem", path = "../ChainX/xrml/xsystem" }
-xassets = { package = "xrml-xassets-assets", path = "../ChainX/xrml/xassets/assets" }
-xsdot = { package = "xrml-xbridge-sdot", path = "../ChainX/xrml/xbridge/sdot" }
+
+#parity ethereum
+ethcore-blockchain = {path = "../parity-ethereum/ethcore/blockchain"}
 
 [dev-dependencies]
 hex-literal = "0.2"

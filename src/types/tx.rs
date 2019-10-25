@@ -2,6 +2,14 @@ use super::*;
 use serde::{Deserialize, Serialize};
 use std::ops;
 
+use parity_codec::{Decode, Encode};
+
+pub type EthereumAddress = [u8; 20];
+
+#[derive(Encode, Decode, Clone, PartialEq)]
+#[cfg_attr(feature = "std", derive(Debug))]
+pub struct EcdsaSignature(pub [u8; 32], pub [u8; 32], pub i8);
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
     ///create creates new contract
@@ -164,7 +172,7 @@ pub struct FullTransaction {
     #[serde(rename = "blockHash")]
     pub block_hash: H256,
     #[serde(rename = "blockNumber")]
-    pub block_number: U256,
+    pub block_number: H256,
     pub from: H160,
     pub to: H160,
     pub gas: U256,
@@ -210,7 +218,7 @@ fn check_replay_protection(v: u64) -> u8 {
     }
 }
 
-fn keccak<T: AsRef<[u8]>>(s: T) -> H256 {
+pub fn keccak<T: AsRef<[u8]>>(s: T) -> H256 {
     let result = tiny_keccak::keccak256(s.as_ref());
     H256::from(result)
 }
